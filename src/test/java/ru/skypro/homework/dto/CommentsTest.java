@@ -1,6 +1,8 @@
 package ru.skypro.homework.dto;
 
 import org.junit.jupiter.api.Test;
+import ru.skypro.homework.model.dto.Comment;
+import ru.skypro.homework.model.dto.Comments;
 
 import java.util.Arrays;
 import java.util.List;

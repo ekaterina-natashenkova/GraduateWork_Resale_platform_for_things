@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/scripts/001-initial-entity-resale-platform.sql
+  - include:
+      file: liquibase/scripts/002-indexes-for-quick-search.sql

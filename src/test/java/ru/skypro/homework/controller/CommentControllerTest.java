@@ -6,7 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ru.skypro.homework.dto.*;
+import ru.skypro.homework.model.dto.Comment;
+import ru.skypro.homework.model.dto.Comments;
+import ru.skypro.homework.model.dto.CreateOrUpdateComment;
 
 import static org.junit.jupiter.api.Assertions.*;
 

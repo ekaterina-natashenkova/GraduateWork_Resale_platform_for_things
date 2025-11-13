@@ -1,6 +1,9 @@
 package ru.skypro.homework.dto;
 
 import org.junit.jupiter.api.Test;
+import ru.skypro.homework.model.dto.Ad;
+import ru.skypro.homework.model.dto.Ads;
+
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package ru.skypro.homework.dto;
 
 import org.junit.jupiter.api.Test;
+import ru.skypro.homework.model.dto.Comment;
 
 import static org.junit.jupiter.api.Assertions.*;
 

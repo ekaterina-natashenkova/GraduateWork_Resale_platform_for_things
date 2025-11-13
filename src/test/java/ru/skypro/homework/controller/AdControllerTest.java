@@ -8,7 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
-import ru.skypro.homework.dto.*;
+import ru.skypro.homework.model.dto.Ad;
+import ru.skypro.homework.model.dto.Ads;
+import ru.skypro.homework.model.dto.CreateOrUpdateAd;
+import ru.skypro.homework.model.dto.ExtendedAd;
 
 import static org.junit.jupiter.api.Assertions.*;
 

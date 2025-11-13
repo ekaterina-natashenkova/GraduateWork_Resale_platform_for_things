@@ -1,6 +1,8 @@
 package ru.skypro.homework.dto;
 
 import org.junit.jupiter.api.Test;
+import ru.skypro.homework.model.dto.Register;
+import ru.skypro.homework.model.enums.Role;
 
 import static org.junit.jupiter.api.Assertions.*;
 
