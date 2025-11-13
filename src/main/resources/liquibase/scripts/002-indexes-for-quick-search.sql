@@ -20,7 +20,7 @@ CREATE INDEX idx_comments_ad_id ON comments(ad_id);
 COMMENT ON INDEX idx_comments_ad_id IS 'Индекс для быстрого поиска комментариев по объявлению';
 
 CREATE INDEX idx_comments_author_id ON comments(author_id);
-COMMENT ON INDEX idx_comments_author_id IS 'Индекс для быстрого поиска комментариев по автору'';
+COMMENT ON INDEX idx_comments_author_id IS 'Индекс для быстрого поиска комментариев по автору';
 
 CREATE INDEX idx_comments_created_at ON comments(created_at);
 COMMENT ON INDEX idx_comments_created_at IS 'Индекс для сортировки комментариев по дате создания';
