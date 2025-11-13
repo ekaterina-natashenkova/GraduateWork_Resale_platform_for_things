@@ -1,7 +1,8 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.skypro.homework.model.enums.Role;
 
 @Data
 @Schema(description = "Регистрация пользователя")

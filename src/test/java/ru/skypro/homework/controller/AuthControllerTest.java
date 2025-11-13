@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ru.skypro.homework.dto.Login;
-import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.model.dto.Login;
+import ru.skypro.homework.model.dto.Register;
 import ru.skypro.homework.service.AuthService;
 
 import static org.junit.jupiter.api.Assertions.*;
