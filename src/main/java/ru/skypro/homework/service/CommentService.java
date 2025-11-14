@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.dto.Comment;
@@ -23,9 +24,18 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final AdRepository adRepository;
+    private final UserService userService;
     private final CommentMapper commentMapper;
+
+    /**
+     * Проверка, является ли пользователь владельцем комментария - используется в @PreAuthorize
+     */
+    public boolean isCommentOwner(Integer commentId, String userEmail) {
+        return commentRepository.findById(commentId)
+                .map(comment -> comment.getAuthor().getEmail().equals(userEmail))
+                .orElse(false);
+    }
 
     public Comments getCommentsByAdId(Integer adId) {
         List<CommentEntity> commentEntities = commentRepository.findByAdIdWithAuthor(adId);
@@ -39,45 +49,44 @@ public class CommentService {
         return result;
     }
 
-    public Optional<Comment> createComment(Integer adId, Integer authorId, CreateOrUpdateComment createComment) {
-        Optional<UserEntity> authorOpt = userRepository.findById(authorId);
-        Optional<AdEntity> adOpt = adRepository.findById(adId);
-
-        if (authorOpt.isEmpty() || adOpt.isEmpty()) {
-            return Optional.empty();
-        }
+    /**
+     * Создать комментарий (автор определяется из SecurityContext)
+     */
+    public Comment createComment(Integer adId, CreateOrUpdateComment createComment) {
+        UserEntity author = userService.getCurrentUserEntity();
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Ad not found"));
 
         CommentEntity commentEntity = commentMapper.createOrUpdateCommentToEntity(createComment);
-        commentEntity.setAuthor(authorOpt.get());
-        commentEntity.setAd(adOpt.get());
+        commentEntity.setAuthor(author);
+        commentEntity.setAd(ad);
         commentEntity.setCreatedAt(LocalDateTime.now());
 
         CommentEntity savedEntity = commentRepository.save(commentEntity);
-        return Optional.of(commentMapper.entityToDto(savedEntity));
+        return commentMapper.entityToDto(savedEntity);
     }
 
-    public Optional<Comment> updateComment(Integer commentId, Integer adId, CreateOrUpdateComment updateComment) {
-        return commentRepository.findByIdAndAdId(commentId, adId)
-                .map(commentEntity -> {
-                    commentEntity.setText(updateComment.getText());
-                    CommentEntity savedEntity = commentRepository.save(commentEntity);
-                    return commentMapper.entityToDto(savedEntity);
-                });
+    /**
+     * Обновить комментарий с проверкой прав через @PreAuthorize
+     */
+    @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentOwner(#commentId, authentication.name)")
+    public Comment updateComment(Integer adId, Integer commentId, CreateOrUpdateComment updateComment) {
+        CommentEntity commentEntity = commentRepository.findByIdAndAdId(commentId, adId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        commentEntity.setText(updateComment.getText());
+        CommentEntity savedEntity = commentRepository.save(commentEntity);
+        return commentMapper.entityToDto(savedEntity);
     }
 
-    public boolean deleteComment(Integer commentId, Integer adId) {
-        Optional<CommentEntity> commentOpt = commentRepository.findByIdAndAdId(commentId, adId);
-        if (commentOpt.isPresent()) {
-            commentRepository.delete(commentOpt.get());
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isCommentAuthor(Integer commentId, Integer authorId) {
-        return commentRepository.findById(commentId)
-                .map(comment -> comment.getAuthor().getId().equals(authorId))
-                .orElse(false);
+    /**
+     * Удалить комментарий с проверкой прав через @PreAuthorize
+     */
+    @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentOwner(#commentId, authentication.name)")
+    public void deleteComment(Integer adId, Integer commentId) {
+        CommentEntity commentEntity = commentRepository.findByIdAndAdId(commentId, adId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        commentRepository.delete(commentEntity);
     }
 
 }
