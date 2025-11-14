@@ -23,7 +23,8 @@ public class AuthController {
 
     @PostMapping("/login")
     @Tag(name = "Авторизация")
-    public ResponseEntity<?> login(@RequestBody Login login) {
+    public ResponseEntity<Void> login(@RequestBody Login login) {
+        log.info("Login request for user: {}", login.getUsername());
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -33,7 +34,8 @@ public class AuthController {
 
     @PostMapping("/register")
     @Tag(name = "Регистрация")
-    public ResponseEntity<?> register(@RequestBody Register register) {
+    public ResponseEntity<Void> register(@RequestBody Register register) {
+        log.info("Register request for user: {}", register.getUsername());
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
