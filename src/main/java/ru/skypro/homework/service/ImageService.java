@@ -26,7 +26,7 @@ public class ImageService {
      * Сохранить аватар пользователя
      */
     public String saveUserImage(MultipartFile image, String userEmail) throws IOException {
-        String filename = generateFilename(userEmail, image.getOriginalFilename());
+        String filename = generateFilename("user_" + userEmail, getFileExtension(image));
         Path filePath = Paths.get(imagesPath, "users", filename);
 
         Files.createDirectories(filePath.getParent());
@@ -37,6 +37,7 @@ public class ImageService {
         // Обновляем путь к изображению в базе данных
         userService.updateUserImage(userEmail, imageUrl);
 
+        log.info("User image saved: {}", imageUrl);
         return imageUrl;
     }
 
@@ -44,20 +45,30 @@ public class ImageService {
      * Сохранить изображение объявления
      */
     public String saveAdImage(MultipartFile image, Integer adId) throws IOException {
-        String filename = generateFilename("ad_" + adId, image.getOriginalFilename());
+        String prefix = adId != null ? "ad_" + adId : "ad_temp";
+        String filename = generateFilename(prefix, getFileExtension(image));
         Path filePath = Paths.get(imagesPath, "ads", filename);
 
         Files.createDirectories(filePath.getParent());
         Files.write(filePath, image.getBytes());
 
-        return "/images/ads/" + filename;
+        String imageUrl = "/images/ads/" + filename;
+        log.info("Ad image saved: {}", imageUrl);
+        return imageUrl;
     }
 
-    private String generateFilename(String prefix, String originalFilename) {
-        String extension = "";
+    /**
+     * Получить расширение файла
+     */
+    private String getFileExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
         if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            return originalFilename.substring(originalFilename.lastIndexOf("."));
         }
+        return ".jpg"; // default extension
+    }
+
+    private String generateFilename(String prefix, String extension) {
         return prefix + "_" + UUID.randomUUID() + extension;
     }
 
@@ -65,8 +76,27 @@ public class ImageService {
      * Получить изображение по пути
      */
     public byte[] getImage(String imagePath) throws IOException {
-        Path filePath = Paths.get(imagesPath, imagePath.replaceFirst("^/images/", ""));
+        String relativePath = imagePath.replaceFirst("^/images/", "");
+        Path filePath = Paths.get(imagesPath, relativePath);
+
+        if (!Files.exists(filePath)) {
+            throw new IOException("Image not found: " + filePath);
+        }
+
         return Files.readAllBytes(filePath);
+    }
+
+    /**
+     * Удалить изображение
+     */
+    public void deleteImage(String imagePath) throws IOException {
+        String relativePath = imagePath.replaceFirst("^/images/", "");
+        Path filePath = Paths.get(imagesPath, relativePath);
+
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+            log.info("Image deleted: {}", imagePath);
+        }
     }
 
 }
