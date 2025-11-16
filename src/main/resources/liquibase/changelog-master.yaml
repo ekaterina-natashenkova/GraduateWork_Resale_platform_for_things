@@ -3,3 +3,7 @@ databaseChangeLog:
       file: liquibase/scripts/001-initial-entity-resale-platform.sql
   - include:
       file: liquibase/scripts/002-indexes-for-quick-search.sql
+  - include:
+      file: liquibase/scripts/003-working-with-images.sql
+  - include:
+      file: liquibase/scripts/004-migrate-existing-images.sql

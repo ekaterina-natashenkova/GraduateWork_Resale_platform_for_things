@@ -15,8 +15,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -60,5 +64,60 @@ public class AdEntity {
     @OneToMany(mappedBy = "ad", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<CommentEntity> comments;
+
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ImageEntity> images = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_image_id")
+    private ImageEntity image;
+
+    /**
+     * Получить главное изображение
+     */
+    public ImageEntity getImage() {
+        return this.image != null ? this.image :
+                (!this.images.isEmpty() ? this.images.get(0) : null);
+    }
+
+    /**
+     * Установить главное изображение
+     */
+    public void setImage(ImageEntity image) {
+        this.image = image;
+        if (image != null) {
+            image.setAd(this);
+            // Также обновляем imagePath для обратной совместимости
+            this.imagePath = image.getFilePath();
+        }
+    }
+
+    /**
+     * Добавить изображение к объявлению
+     */
+    public void addImage(ImageEntity image) {
+        image.setAd(this);
+        this.images.add(image);
+        // Если это первое изображение, устанавливаем как главное
+        if (this.images.size() == 1) {
+            this.image = image;
+            this.imagePath = image.getFilePath();
+        }
+    }
+
+    // Геттер для обратной совместимости
+    public String getImagePath() {
+        return this.image != null ? this.image.getFilePath() : this.imagePath;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }

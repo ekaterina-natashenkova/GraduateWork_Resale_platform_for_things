@@ -34,6 +34,7 @@ public class ImageStorageInitializer {
 
         } catch (IOException e) {
             log.error("Failed to initialize image storage at: {}", imagesPath, e);
+            // Не бросаем исключение, чтобы приложение могло запуститься
         }
     }
 
@@ -46,7 +47,7 @@ public class ImageStorageInitializer {
         }
 
         Files.createDirectories(directoryPath);
-        log.info("Created image directory: {}", directoryPath);
+        log.info("📁 Created image directory: {}", directoryPath);
     }
 
 }

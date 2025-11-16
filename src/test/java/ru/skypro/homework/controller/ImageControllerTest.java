@@ -1,281 +1,232 @@
 package ru.skypro.homework.controller;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import ru.skypro.homework.service.ImageService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ImageControllerTest {
 
-    @InjectMocks
-    private ImageController imageController;
-
     @Mock
     private ImageService imageService;
 
-    @Mock
-    private HttpServletRequest request;
+    @InjectMocks
+    private ImageController imageController;
 
     @Test
-    void getImage_WithJpgFile_ShouldReturnImageWithCorrectContentType() throws IOException {
+    @DisplayName("GET /images/ads/{adId}/image - успешное получение изображения объявления")
+    void getAdImage_Success() throws Exception {
         // Given
-        String imagePath = "/images/users/user_123.jpg";
-        byte[] imageBytes = "fake image content".getBytes();
+        Integer adId = 1;
+        byte[] imageBytes = "fake image data".getBytes();
+        String contentType = "image/jpeg";
 
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        when(imageService.getAdImage(adId)).thenReturn(imageBytes);
+        when(imageService.getImageContentType(adId, "ad")).thenReturn(contentType);
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getAdImage(adId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertArrayEquals(imageBytes, response.getBody());
-        assertEquals(MediaType.IMAGE_JPEG, response.getHeaders().getContentType());
-        assertEquals("max-age=3600", response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(imageBytes);
+        assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.parseMediaType(contentType));
+        assertThat(response.getHeaders().getCacheControl()).isEqualTo("max-age=3600");
 
-        verify(imageService).getImage(imagePath);
+        verify(imageService).getAdImage(adId);
+        verify(imageService).getImageContentType(adId, "ad");
     }
 
     @Test
-    void getImage_WithJpegFile_ShouldReturnImageWithCorrectContentType() throws IOException {
+    @DisplayName("GET /images/ads/{adId}/image - изображение не найдено")
+    void getAdImage_NotFound() throws Exception {
         // Given
-        String imagePath = "/images/ads/ad_456.jpeg";
-        byte[] imageBytes = "fake jpeg image".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        Integer adId = 1;
+        when(imageService.getAdImage(adId)).thenThrow(new IOException("Image not found"));
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getAdImage(adId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.IMAGE_JPEG, response.getHeaders().getContentType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+
+        verify(imageService).getAdImage(adId);
+        verify(imageService, never()).getImageContentType(any(), any());
     }
 
     @Test
-    void getImage_WithPngFile_ShouldReturnImageWithCorrectContentType() throws IOException {
+    @DisplayName("GET /images/ads/{adId}/image - внутренняя ошибка сервера")
+    void getAdImage_InternalServerError() throws Exception {
         // Given
-        String imagePath = "/images/users/avatar_789.png";
-        byte[] imageBytes = "fake png image".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        Integer adId = 1;
+        when(imageService.getAdImage(adId)).thenThrow(new RuntimeException("Database error"));
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getAdImage(adId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.IMAGE_PNG, response.getHeaders().getContentType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNull();
+
+        verify(imageService).getAdImage(adId);
+        verify(imageService, never()).getImageContentType(any(), any());
     }
 
     @Test
-    void getImage_WithGifFile_ShouldReturnImageWithCorrectContentType() throws IOException {
+    @DisplayName("GET /images/users/{userId}/avatar - успешное получение аватара пользователя")
+    void getUserAvatar_Success() throws Exception {
         // Given
-        String imagePath = "/images/ads/animated_ad_111.gif";
-        byte[] imageBytes = "fake gif image".getBytes();
+        Integer userId = 1;
+        byte[] imageBytes = "fake avatar data".getBytes();
+        String contentType = "image/png";
 
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        when(imageService.getUserAvatar(userId)).thenReturn(imageBytes);
+        when(imageService.getImageContentType(userId, "user")).thenReturn(contentType);
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getUserAvatar(userId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.IMAGE_GIF, response.getHeaders().getContentType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(imageBytes);
+        assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.parseMediaType(contentType));
+        assertThat(response.getHeaders().getCacheControl()).isEqualTo("max-age=3600");
+
+        verify(imageService).getUserAvatar(userId);
+        verify(imageService).getImageContentType(userId, "user");
     }
 
     @Test
-    void getImage_WithUnknownExtension_ShouldReturnOctetStream() throws IOException {
+    @DisplayName("GET /images/users/{userId}/avatar - аватар не найден")
+    void getUserAvatar_NotFound() throws Exception {
         // Given
-        String imagePath = "/images/users/avatar.bmp";
-        byte[] imageBytes = "fake bmp image".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        Integer userId = 1;
+        when(imageService.getUserAvatar(userId)).thenThrow(new IOException("Avatar not found"));
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getUserAvatar(userId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.APPLICATION_OCTET_STREAM, response.getHeaders().getContentType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+
+        verify(imageService).getUserAvatar(userId);
+        verify(imageService, never()).getImageContentType(any(), any());
     }
 
     @Test
-    void getImage_WithNoExtension_ShouldReturnOctetStream() throws IOException {
+    @DisplayName("GET /images/users/{userId}/avatar - внутренняя ошибка сервера")
+    void getUserAvatar_InternalServerError() throws Exception {
         // Given
-        String imagePath = "/images/users/avatar";
-        byte[] imageBytes = "fake image without extension".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        Integer userId = 1;
+        when(imageService.getUserAvatar(userId)).thenThrow(new RuntimeException("Service error"));
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getUserAvatar(userId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.APPLICATION_OCTET_STREAM, response.getHeaders().getContentType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNull();
+
+        verify(imageService).getUserAvatar(userId);
+        verify(imageService, never()).getImageContentType(any(), any());
     }
 
     @Test
-    void getImage_WithUppercaseExtension_ShouldReturnCorrectContentType() throws IOException {
+    @DisplayName("GET /images/ads/{adId}/image - проверка разных Content-Type")
+    void getAdImage_DifferentContentTypes() throws Exception {
         // Given
-        String imagePath = "/images/users/avatar.PNG";
-        byte[] imageBytes = "fake png image".getBytes();
+        Integer adId = 1;
+        byte[] imageBytes = "test image".getBytes();
 
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
+        when(imageService.getAdImage(adId)).thenReturn(imageBytes);
+
+        // Test JPEG
+        when(imageService.getImageContentType(adId, "ad")).thenReturn("image/jpeg");
+        ResponseEntity<byte[]> jpegResponse = imageController.getAdImage(adId);
+        assertThat(jpegResponse.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_JPEG);
+
+        // Test PNG
+        when(imageService.getImageContentType(adId, "ad")).thenReturn("image/png");
+        ResponseEntity<byte[]> pngResponse = imageController.getAdImage(adId);
+        assertThat(pngResponse.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_PNG);
+
+        // Test GIF
+        when(imageService.getImageContentType(adId, "ad")).thenReturn("image/gif");
+        ResponseEntity<byte[]> gifResponse = imageController.getAdImage(adId);
+        assertThat(gifResponse.getHeaders().getContentType()).isEqualTo(MediaType.IMAGE_GIF);
+
+        // Test fallback
+        when(imageService.getImageContentType(adId, "ad")).thenReturn("application/octet-stream");
+        ResponseEntity<byte[]> fallbackResponse = imageController.getAdImage(adId);
+        assertThat(fallbackResponse.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    @Test
+    @DisplayName("GET /images/users/{userId}/avatar - проверка кэширования")
+    void getUserAvatar_CacheHeaders() throws Exception {
+        // Given
+        Integer userId = 1;
+        byte[] imageBytes = "avatar".getBytes();
+        String contentType = "image/jpeg";
+
+        when(imageService.getUserAvatar(userId)).thenReturn(imageBytes);
+        when(imageService.getImageContentType(userId, "user")).thenReturn(contentType);
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getUserAvatar(userId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.IMAGE_PNG, response.getHeaders().getContentType());
+        assertThat(response.getHeaders().getCacheControl()).isEqualTo("max-age=3600");
     }
 
     @Test
-    void getImage_WhenImageNotFound_ShouldReturnNotFound() throws IOException {
+    @DisplayName("GET /images/ads/{adId}/image - пустое тело ответа при ошибке")
+    void getAdImage_EmptyBodyOnError() throws Exception {
         // Given
-        String imagePath = "/images/users/nonexistent.jpg";
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenThrow(new IOException("Image not found"));
+        Integer adId = 1;
+        when(imageService.getAdImage(adId)).thenThrow(new IOException("Not found"));
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        ResponseEntity<byte[]> response = imageController.getAdImage(adId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
-
-        verify(imageService).getImage(imagePath);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
     }
 
     @Test
-    void getImage_WhenServiceThrowsRuntimeException_ShouldReturnInternalServerError() throws IOException {
+    @DisplayName("GET /images/users/{userId}/avatar - проверка вызовов сервиса")
+    void getUserAvatar_ServiceCalls() throws Exception {
         // Given
-        String imagePath = "/images/users/corrupted.jpg";
+        Integer userId = 1;
+        byte[] imageBytes = "avatar data".getBytes();
+        String contentType = "image/jpeg";
 
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenThrow(new RuntimeException("Unexpected error"));
+        when(imageService.getUserAvatar(userId)).thenReturn(imageBytes);
+        when(imageService.getImageContentType(userId, "user")).thenReturn(contentType);
 
         // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
+        imageController.getUserAvatar(userId);
 
         // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNull(response.getBody());
-    }
-
-    @Test
-    void getImage_WithComplexPath_ShouldHandleCorrectly() throws IOException {
-        // Given
-        String imagePath = "/images/ads/2024/01/15/ad_123_final.jpg";
-        byte[] imageBytes = "complex path image".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
-
-        // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
-
-        // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(MediaType.IMAGE_JPEG, response.getHeaders().getContentType());
-    }
-
-    @Test
-    void getImage_WithQueryParameters_ShouldIgnoreThem() throws IOException {
-        // Given
-        String imagePath = "/images/users/avatar.jpg";
-        byte[] imageBytes = "image with query params".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
-
-        // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
-
-        // Then
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        // Note: Query parameters are handled by HttpServletRequest and included in getRequestURI()
-    }
-
-    @Test
-    void determineContentType_ShouldReturnCorrectTypes() {
-        // Using reflection to test private method, or we can test through public method
-
-        ImageController controller = new ImageController(imageService);
-
-        // Test through public method by mocking the service call
-        // This tests the determineContentType logic indirectly
-    }
-
-    @Test
-    void getImage_ShouldSetCacheControlHeader() throws IOException {
-        // Given
-        String imagePath = "/images/users/avatar.jpg";
-        byte[] imageBytes = "cached image".getBytes();
-
-        when(request.getRequestURI()).thenReturn(imagePath);
-        when(imageService.getImage(imagePath)).thenReturn(imageBytes);
-
-        // When
-        ResponseEntity<byte[]> response = imageController.getImage(request);
-
-        // Then
-        assertNotNull(response);
-        assertEquals("max-age=3600", response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL));
-    }
-
-    @Test
-    void determineContentType_WithReflection_ShouldReturnCorrectTypes() throws Exception {
-        // Given
-        ImageController controller = new ImageController(imageService);
-
-        // Use reflection to access private method
-        var method = ImageController.class.getDeclaredMethod("determineContentType", String.class);
-        method.setAccessible(true);
-
-        // When & Then
-        assertEquals("image/jpeg", method.invoke(controller, "/path/image.jpg"));
-        assertEquals("image/jpeg", method.invoke(controller, "/path/image.jpeg"));
-        assertEquals("image/png", method.invoke(controller, "/path/image.png"));
-        assertEquals("image/gif", method.invoke(controller, "/path/image.gif"));
-        assertEquals("application/octet-stream", method.invoke(controller, "/path/image.bmp"));
-        assertEquals("application/octet-stream", method.invoke(controller, "/path/image"));
-        assertEquals("application/octet-stream", method.invoke(controller, "/path/image.unknown"));
+        verify(imageService, times(1)).getUserAvatar(userId);
+        verify(imageService, times(1)).getImageContentType(userId, "user");
+        verifyNoMoreInteractions(imageService);
     }
 
 }

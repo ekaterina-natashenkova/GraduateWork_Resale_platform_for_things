@@ -21,20 +21,21 @@ public class BasicAuthCorsFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Добавляем CORS заголовки
-        response.addHeader("Access-Control-Allow-Credentials", "true");
-        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-        response.addHeader("Access-Control-Allow-Headers",
-                "Authorization, Content-Type, Accept, X-Requested-With, remember-me");
-        response.addHeader("Access-Control-Max-Age", "3600");
+        // ВРЕМЕННОЕ РЕШЕНИЕ - разрешаем ВСЕ origins
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers",
+                "Authorization, Content-Type, Accept, X-Requested-With, remember-me, Origin, X-Auth-Token");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Expose-Headers", "Authorization");
 
         // Для preflight запросов (OPTIONS) сразу отвечаем OK
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
-        } else {
-            filterChain.doFilter(request, response);
+            return; // НЕ продолжаем цепочку фильтров для OPTIONS
         }
-    }
 
+        filterChain.doFilter(request, response);
+    }
 }
