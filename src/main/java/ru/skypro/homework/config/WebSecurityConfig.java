@@ -35,7 +35,7 @@ public class WebSecurityConfig {
                                 .antMatchers(AUTH_WHITELIST).permitAll()
                                 .antMatchers("/admin/**").hasRole("ADMIN")
                                 .antMatchers("/ads/**", "/users/**").authenticated())
-                .cors().disable() // Используем BasicAuthCorsFilter
+                // .cors().disable() // ← УДАЛИТЬ эту строку - разрешить CORS фильтру работать
                 .httpBasic(withDefaults());
         return http.build();
     }

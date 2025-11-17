@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.dto.Register;
 import ru.skypro.homework.model.dto.User;
+import ru.skypro.homework.model.entity.ImageEntity;
 import ru.skypro.homework.model.entity.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 
@@ -79,7 +80,7 @@ public class UserService {
     }
 
     /**
-     * Создать пользователя (без установки пароля - этим занимается Spring Security при регистрации)
+     * Создать пользователя
      */
     public User createUser(User userDto) {
         if (userRepository.existsByEmail(userDto.getEmail())) {
@@ -87,7 +88,6 @@ public class UserService {
         }
 
         UserEntity userEntity = userMapper.dtoToEntity(userDto);
-
         UserEntity savedEntity = userRepository.save(userEntity);
         return userMapper.entityToDto(savedEntity);
     }
@@ -101,12 +101,22 @@ public class UserService {
     }
 
     /**
-     * Обновить аватар пользователя
+     * Обновить аватар пользователя (старый метод для обратной совместимости)
      */
     public void updateUserImage(String email, String imageUrl) {
         UserEntity userEntity = getUserEntityByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         userEntity.setImagePath(imageUrl);
+        userRepository.save(userEntity);
+    }
+
+    /**
+     * Обновить аватар пользователя с ImageEntity
+     */
+    public void updateUserImage(String userEmail, ImageEntity image) {
+        UserEntity userEntity = getUserEntityByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        userEntity.setImage(image);
         userRepository.save(userEntity);
     }
 

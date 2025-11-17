@@ -1,0 +1,47 @@
+version: '3.3'
+
+services:
+  frontend:
+    image: ghcr.io/dmitry-bizin/front-react-avito:v1.21
+    ports:
+      - "3000:3000"
+#    depends_on:
+#      - backend
+
+#  backend:
+#    build:
+#      context: .  # или путь к папке с бекендом, например ./backend
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/Resale_platform
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=12345
+#      # опционально: - SPRING_PROFILES_ACTIVE=docker
+#    depends_on:
+#      - postgres
+
+#  postgres:
+#    image: postgres:12  # ← ИЗМЕНИТЬ (12, 13-alpine, 14, 15, 15-alpine) проблема с PostgreSQL в Docker Toolbox на "старом железе"
+#    environment:
+#      POSTGRES_DB: Resale_platform
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: 12345
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+#      PGADMIN_DEFAULT_PASSWORD: admin
+#    ports:
+#      - "5050:80"
+#    depends_on:
+#      - postgres
+#
+#volumes:
+#  postgres_data:

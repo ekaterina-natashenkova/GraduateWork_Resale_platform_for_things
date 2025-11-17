@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,12 +20,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.model.dto.Ad;
 import ru.skypro.homework.model.dto.Ads;
 import ru.skypro.homework.model.dto.CreateOrUpdateAd;
 import ru.skypro.homework.model.dto.ExtendedAd;
+import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.CommentService;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,6 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 @Tag(name = "Объявления")
 public class AdController {
+
+    private final AdService adService;
+    private final CommentService commentService;
 
     @Operation(
             summary = "Получение всех объявлений",
@@ -193,6 +201,56 @@ public class AdController {
                                          @RequestParam("image") MultipartFile image) {
         log.info("Called updateImage with id: {}", id);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Создать объявление с картинкой
+     */
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Ad> createAd(@RequestPart("properties") CreateOrUpdateAd properties,
+                                       @RequestPart("image") MultipartFile image) {
+        log.info("Creating new ad with image");
+        try {
+            Ad createdAd = adService.createAd(properties, image);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);
+        } catch (Exception e) {
+            log.error("Failed to create ad", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Обновить картинку объявления
+     */
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN') or @adService.isAdOwner(#id, authentication.name)")
+    public ResponseEntity<Ad> updateAdImage(@PathVariable("id") Integer id,
+                                            @RequestParam("image") MultipartFile image) {
+        log.info("Updating image for ad id: {}", id);
+        try {
+            Ad updatedAd = adService.updateAdImage(id, image);
+            return ResponseEntity.ok(updatedAd);
+        } catch (Exception e) {
+            log.error("Failed to update ad image for id: {}", id, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Получить картинку объявления
+     */
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getAdImage(@PathVariable("id") Integer id) {
+        log.info("Getting image for ad id: {}", id);
+        try {
+            byte[] imageBytes = adService.getAdImage(id);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+        } catch (Exception e) {
+            log.error("Failed to get ad image for id: {}", id, e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }
