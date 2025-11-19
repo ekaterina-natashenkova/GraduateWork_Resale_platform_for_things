@@ -159,20 +159,20 @@ OpenAPI: http://localhost:8080/v3/api-docs
 > •	POST /users/set_password - смена пароля  
 > •	PATCH /users/me/image - обновить аватар  
 #### Объявления:
-> •	GET /ads - все объявления  
-> •	POST /ads - создать объявление  
-> •	GET /ads/me - все объявления текущего пользователя  
-> •	GET /ads/{id} - Получение информации об объявлении по ID  
-> •	PATCH /ads/{id} - обновить объявление по ID  
-> •	DELETE /ads/{id} - удалить объявление по ID  
+> •	GET /ads - все объявления   
+> •	POST /ads - создать объявление   
+> •	GET /ads/me - все объявления текущего пользователя   
+> •	GET /ads/{id} - Получение информации об объявлении по ID   
+> •	PATCH /ads/{id} - обновить объявление по ID   
+> •	DELETE /ads/{id} - удалить объявление по ID   
 > •	PATCH /ads/{id}/image - обновить изображение объявления  по ID  
 #### Комментарии:
-> •	GET /ads/{id}/comments - комментарии к объявлению  
-> •	POST /ads/{id}/comments - добавить комментарий  
-> •	PATCH /ads/{adId}/comments/{commentId} - обновить комментарий  
-> •	DELETE /ads/{adId}/comments/{commentId} - удалить комментарий  
+> •	GET /ads/{id}/comments - комментарии к объявлению   
+> •	POST /ads/{id}/comments - добавить комментарий   
+> •	PATCH /ads/{adId}/comments/{commentId} - обновить комментарий   
+> •	DELETE /ads/{adId}/comments/{commentId} - удалить комментарий   
 #### Изображения:
-> •	GET /images/ads/{adId}/image - получение изображения объявления  
+> •	GET /images/ads/{adId}/image - получение изображения объявления   
 > •	GET /images/users/{userId}/avatar - получение аватара пользователя  
 
 ---
