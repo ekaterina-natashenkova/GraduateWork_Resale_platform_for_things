@@ -136,11 +136,11 @@ app.images.auto-create-dir=true
 - Порт 8080 свободен - приложение будет доступно по адресу: http://localhost:8080
 
 ### Сборка проекта
-mvn clean package 
+```mvn clean package```
 (Maven -> Ads application -> Lifecycle -> clean -> package)
 
 ### Запуск приложения
-java -jar target/ads-0.0.1-SNAPSHOT.jar
+```java -jar target/ads-0.0.1-SNAPSHOT.jar```
 
 ***
 ## Документация API
