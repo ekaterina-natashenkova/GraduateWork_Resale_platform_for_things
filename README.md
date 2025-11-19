@@ -165,7 +165,7 @@ OpenAPI: http://localhost:8080/v3/api-docs
 •	GET /ads/{id} - Получение информации об объявлении по ID  
 •	PATCH /ads/{id} - обновить объявление по ID  
 •	DELETE /ads/{id} - удалить объявление по ID  
-•	PATCH /ads/{id}/image - обновить изображение объявления  по ID    
+•	PATCH /ads/{id}/image - обновить изображение объявления  по ID  
 #### Комментарии:
 •	GET /ads/{id}/comments - комментарии к объявлению  
 •	POST /ads/{id}/comments - добавить комментарий  
