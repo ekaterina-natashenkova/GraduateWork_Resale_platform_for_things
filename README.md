@@ -135,10 +135,12 @@ app.images.auto-create-dir=true
 - Настроена переменная окружения DB_PASSWORD
 - Порт 8080 свободен - приложение будет доступно по адресу: http://localhost:8080
 
-### Сборка
+### Сборка проекта
+mvn clean package 
+(Maven -> Ads application -> Lifecycle -> clean -> package)
 
-### Запуск
-
+### Запуск приложения
+java -jar target/ads-0.0.1-SNAPSHOT.jar
 
 ***
 ## Документация API
